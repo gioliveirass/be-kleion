@@ -1,0 +1,28 @@
+generator client {
+  provider            = "prisma-client"
+  output              = "../generated/prisma"
+  importFileExtension = "ts"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Artifact {
+  id              String   @id @default(cuid())
+  inventoryNumber String   @unique
+  title           String
+  description     String?
+  objectType      String
+  material        String?
+  period          String?
+  date            String?
+  culture         String?
+  provenance      String?
+  institution     String?
+  imageUrl        String?
+  externalSource  String?
+  externalId      String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
