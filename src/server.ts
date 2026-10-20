@@ -1,7 +1,7 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
-
-import { prisma } from "./lib/prisma";
+import fastifySwagger from "@fastify/swagger";
+import fastifySwaggerUi from "@fastify/swagger-ui";
 import { artifactRoutes } from "./routes/artifacts";
 
 const app = Fastify({
@@ -13,29 +13,37 @@ async function start() {
     origin: true,
   });
 
+  await app.register(fastifySwagger, {
+    openapi: {
+      info: {
+        title: "Kleion API",
+        description: "API para gerenciamento de um acervo digital.",
+        version: "1.0.0",
+      },
+      servers: [
+        {
+          url: "http://localhost:3333",
+          description: "Servidor local",
+        },
+      ],
+      tags: [
+        {
+          name: "Artifacts",
+          description: "Gerenciamento dos itens do acervo",
+        },
+      ],
+    },
+  });
+
+  await app.register(fastifySwaggerUi, {
+    routePrefix: "/docs",
+  });
+
   app.get("/", async () => {
     return {
       status: "Service is running! 🚀⭐",
       service: "kleion-api",
     };
-  });
-
-  app.get("/health/db", async (_request, reply) => {
-    try {
-      await prisma.$queryRaw`SELECT 1`;
-
-      return {
-        status: "OK ✅ ",
-        database: "Connected ✅ ",
-      };
-    } catch (error) {
-      app.log.error(error);
-
-      return reply.code(500).send({
-        status: "NOK ❌",
-        database: "Disconnected ❌",
-      });
-    }
   });
 
   await app.register(artifactRoutes);
